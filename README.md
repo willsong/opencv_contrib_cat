@@ -1,60 +1,74 @@
-## Repository for OpenCV's extra modules
+This is a fork of the opencv_contrib (https://github.com/opencv/opencv) repo, modified to support cat face and facemarks.
 
-This repository is intended for the development of so-called "extra" modules,
-contributed functionality. New modules quite often do not have stable API,
-and they are not well-tested. Thus, they shouldn't be released as a part of
-official OpenCV distribution, since the library maintains binary compatibility,
-and tries to provide decent performance and stability.
+## Building
 
-So, all the new modules should be developed separately, and published in the
-`opencv_contrib` repository at first. Later, when the module matures and gains
-popularity, it is moved to the central OpenCV repository, and the development team
-provides production-quality support for this module.
-
-### How to build OpenCV with extra modules
-
-You can build OpenCV, so it will include the modules from this repository. Contrib modules are under constant development and it is recommended to use them alongside the master branch or latest releases of OpenCV.
-
-Here is the CMake command for you:
-
+1. Download OpenCV source code to local machine: https://github.com/opencv/opencv
 ```
-$ cd <opencv_build_directory>
-$ cmake -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules <opencv_source_directory>
-$ make -j5
+cd ~
+cd git
+git clone https://github.com/opencv/opencv.git
+```
+2. Download this repo to local machine
+```
+cd ~
+cd git
+git clone https://github.com/willsong/opencv-facemark-trainer.git
+```
+3. Run cmake for the build:
+```
+cd ~
+cd git
+mkdir build
+cd build
+cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules -DBUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release ../opencv
+```
+4. Build (this can take ~30 mins depending on HW)
+```
+cd ~
+cd git
+cd build
+make -j6
 ```
 
-As the result, OpenCV will be built in the `<opencv_build_directory>` with all
-modules from `opencv_contrib` repository. If you don't want all of the modules,
-use CMake's `BUILD_opencv_*` options. Like in this example:
+## Setup for training
 
+1. Download kaggle dataset (https://www.kaggle.com/crawford/cat-dataset)
+2. Download facemark annotator
 ```
-$ cmake -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules -DBUILD_opencv_legacy=OFF <opencv_source_directory>
+cd ~
+cd git
+git clone https://github.com/willsong/opencv-facemark-annotator.git
 ```
 
-If you also want to build the samples from the "samples" folder of each module, also include the "-DBUILD_EXAMPLES=ON" option.
+## Create annoations
 
-If you prefer using the gui version of cmake (cmake-gui), then, you can add `opencv_contrib` modules within `opencv` core by doing the following:
+The kaggle dataset is divided into different folders.
+Assume that we are annotating the images in: ~/Downloads/archive/CAT_06/
 
-1. Start cmake-gui.
+1. Create target folder - images for training will be copied here, as well as the annotation data
+```
+cd ~
+cd git
+cd opencv-facemark-annotator
+cd assets
+mkdir test
+```
+2. Run the annotator - all images will be copied, and annot.txt and images.txt will be created
+```
+cd ~
+cd git
+cd opencv-facemark-annotator
+cd util
+python annotate.py ~/Downloads/archive/CAT_06/ ~/git/opencv-facemark-annotator/assets/test/
+```
 
-2. Select the opencv source code folder and the folder where binaries will be built (the 2 upper forms of the interface).
+## Run the trainer
 
-3. Press the `configure` button. You will see all the opencv build parameters in the central interface.
-
-4. Browse the parameters and look for the form called `OPENCV_EXTRA_MODULES_PATH` (use the search form to focus rapidly on it).
-
-5. Complete this `OPENCV_EXTRA_MODULES_PATH` by the proper pathname to the `<opencv_contrib>/modules` value using its browse button.
-
-6. Press the `configure` button followed by the `generate` button (the first time, you will be asked which makefile style to use).
-
-7. Build the `opencv` core with the method you chose (make and make install if you chose Unix makefile at step 6).
-
-8. To run, linker flags to contrib modules will need to be added to use them in your code/IDE. For example to use the aruco module, "-lopencv_aruco" flag will be added.
-
-### Update the repository documentation
-
-In order to keep a clean overview containing all contributed modules, the following files need to be created/adapted:
-
-1. Update the README.md file under the modules folder. Here, you add your model with a single line description.
-
-2. Add a README.md inside your own module folder. This README explains which functionality (separate functions) is available, links to the corresponding samples and explains in somewhat more detail what the module is expected to do. If any extra requirements are needed to build the module without problems, add them here also.
+Run the following commands
+```
+cd ~
+cd git
+cd build
+bin/example_face_facemark_demo_lbf ~/git/opencv-facemark-annotator/assets/cascade/haarcascade_frontalcatface_extended.xml ~/git/opencv-facemark-annotator/assets/test/images.txt ~/git/opencv-facemark-annotator/assets/test/annot.txt ~/git/opencv-facemark-annotator/assets/test/lbfmodel.yaml
+```
+The model lbfmodel.yaml will be generated in ~/git/opencv-facemark-annotator/assets/test/
