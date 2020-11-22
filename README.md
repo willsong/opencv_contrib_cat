@@ -53,8 +53,8 @@ cd opencv-facemark-annotator
 cd assets
 mkdir test
 ```
-- if you want to just test the trainer with a small subset of images, change max_images from 0 to 100 in util/annotate.py
 2. Run the annotator - all images will be copied, and annot.txt and images.txt will be created
+- if you want to just test the trainer with a small subset of images, change max_images from 0 to 100 in util/annotate.py
 ```
 cd ~
 cd git
